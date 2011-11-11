@@ -1,6 +1,7 @@
 function love.load()
    love.graphics.setCaption("BaconGameJam 1")
    player = love.graphics.newImage("player.png")
+   bullet = love.graphics.newImage("bullet.png")
    x = 50
    y = love.graphics.getHeight() - player:getHeight()
    bullets = { {} }
@@ -68,4 +69,14 @@ function love.draw()
    love.graphics.draw(player, x, y)
    info = bullet_count .. "/" .. 60 .. "\n" .. "Reloading: " .. is_reloading
    love.graphics.print(info, 0, 0)
+
+   bullet_now = 0
+
+   while bullet_now <= 60 do
+      if bullets[bullet_now] ~= nil and bullets[bullet_now].exists == 1 then
+           love.graphics.draw(bullet, bullets[bullet_now].x, bullets[bullet_now].y)
+      end
+      bullet_now = bullet_now + 1
+   end
+
 end
