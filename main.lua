@@ -6,6 +6,8 @@ function love.load()
    jackson = love.graphics.newImage("jackson.png")
    hall = love.graphics.newImage("hall.png")
    mine = love.graphics.newImage("mine.png")
+   le_programmer = love.graphics.newImage("helper.png")
+   
    say_msg = {}
    conversation = 0
    x = 50
@@ -33,15 +35,24 @@ function love.load()
       [52] = {"So sad, so alone...", jackson},
       [61] = {"Delta X we have hostile movement in your area over!", hall},
       [70] = {"Copy that Orange 3, will take them out.", jackson},
-      [80] = {nil, nil},
+      [80] = {"Spacebar to shoot.\n    Arrows to move.\n     z to reload\n     This game is lovely, and so are you.", le_programmer},
+      [90] = {nil, nil},
+      [115] = {"Something is wrong... these are military ghosts!", jackson},
       [130] = {"Delta X skies are clear. Very well played on defeating the magic ball attack.", hall},
       [137] = {"But you, you must die!", hall},
       [145] = {"I knew it Hall! You'll never take me!", jackson}, --_alarm},
       [150] = {"It was not my order. But it must happen, die Jackson! Die!", hall},
       [158] = {nil, nil}
    }
-
-
+   
+   post = { 
+      ["enemies killed"] = 0,
+      ["enemies let go"] = 0,
+      ["bullets fired"] = 0,
+      ["times reloaded"] = 0,
+      ["time taken"] = 0,
+      ["game finished"] = 0
+   }
 end
 
 function love.update(dt)
@@ -50,6 +61,8 @@ function love.update(dt)
    elseif love.keyboard.isDown("left") then
       x = x - (speed * dt)
    end
+   
+   post["time taken"] = post["time taken"] + dt
 
    if is_reloading > 0 then
        is_reloading = is_reloading - dt
@@ -67,9 +80,11 @@ function love.update(dt)
          bullets[bullet_count].exists = 1
          bullets[bullet_count].x = x + (player:getWidth() / 2)
          bullets[bullet_count].y = y 
+         post["bullets fired"] = post["bullets fired"] + 1
          --print("fire")
          if bullet_count < 1 then
             is_reloading = 1
+            post["times reloaded"] = post["times reloaded"] + 1
             --print("reloading")
          end
       end
@@ -77,8 +92,9 @@ function love.update(dt)
 
    if love.keyboard.isDown("z") then
       if is_reloading == 0 then
-         is_reloading = (.016666666) * ((bullet_count + 1) / 1.25)
+         is_reloading = 1
          --print("reloading")
+         post["times reloaded"] = post["times reloaded"] + 1
       end
    end
 
@@ -102,6 +118,7 @@ function love.update(dt)
          mines[mine_now].y = mines[mine_now].y + (dt * 50)
          if mines[mine_now].y > love.graphics.getHeight() then
             mines[mine_now] = { nil }
+            post["enemies let go"] = post["enemies let go"] + 1
          end
       end
       mine_now = mine_now + 1
@@ -120,16 +137,21 @@ function love.update(dt)
       end
    end
 
-   collidersbull = 1
-   collidersmine = 1
+   local collidersbull = 1
+   local collidersmine = 1
+   local ydiff = 0
+   local xdiff = 0
 
    while collidersbull <= 60 do
-      if bullets[collidersbull].y ~= nil then
+      if bullets[collidersbull].y ~= nil and bullets[collidersbull].exists == 1 then
       while collidersmine <= current_mine do
          if mines[collidersmine] ~= nil and mines[collidersmine].y ~= nil then
-         if math.abs(bullets[collidersbull].y - mines[collidersmine].y) <= 300 then
-            if math.abs(bullets[collidersbull].x - mines[collidersmine].x) <= 300 then
+         ydiff = bullets[collidersbull].y - mines[collidersmine].y
+         if ydiff <= 60 and ydiff >= 0 then
+            xdiff = bullets[collidersbull].x - mines[collidersmine].x
+            if xdiff <= 60 and xdiff >= 0 then
                mines[collidersmine] = {nil}
+               post["enemies killed"] = post["enemies killed"] + 1
             end
          end
          end
@@ -139,7 +161,7 @@ function love.update(dt)
       collidersbull = collidersbull + 1
    end
    conversation = conversation + dt
-   if love.keyboard.isDown("s") then
+   if love.keyboard.isDown("s") and conversation < 70 then
       conversation = 70
    end
 
@@ -180,4 +202,14 @@ function love.draw()
    if say_msg[1] ~= nil then
       say(say_msg[1], say_msg[2])
    end
+end
+
+function love.quit()
+   -- temporary post mortem stats
+   print("Enemies Killed: " .. post["enemies killed"])
+   print("Enemies Let Go: " .. post["enemies let go"])
+   print("Bullets Fired: " .. post["bullets fired"])
+   print("Times Reloaded: " .. post["times reloaded"])
+   print("Time Taken: " .. post["time taken"])
+   print("Completed? " .. ((post["game finished"] > 0) and "Yes!" or "No."))
 end
