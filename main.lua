@@ -1,9 +1,10 @@
 function love.load()
    love.graphics.setCaption("BaconGameJam 1")
+   bg = love.graphics.newImage("sky.jpg")
    player = love.graphics.newImage("player.png")
    bullet = love.graphics.newImage("bullet.png")
    jackson = love.graphics.newImage("jackson.png")
-   hall = love.graphics.newImage("jackson.png")
+   hall = love.graphics.newImage("hall.png")
    say_msg = {}
    conversation = 0
    x = 50
@@ -12,6 +13,8 @@ function love.load()
    for i=1,60 do
        bullets[i] = {}
    end
+
+   mines = { {} }
 
    bullet_count = 60
    is_reloading = 0
@@ -101,13 +104,19 @@ end
 
 function say(message, image)
    love.graphics.draw(image, 0, love.graphics.getHeight() - image:getHeight())
+   love.graphics.setColor({0, 0, 0, 255})
    love.graphics.print(message, image:getWidth(), love.graphics.getHeight() - image:getHeight())
+   love.graphics.setColor({255, 255, 255, 255})
 end
 
 function love.draw()
+   love.graphics.draw(bg, 0, 0)
    love.graphics.draw(player, x, y)
+
+   love.graphics.setColor({0, 0, 0, 255})
    info = bullet_count .. "/" .. 60 .. "\n" .. "Reloading: " .. is_reloading
    love.graphics.print(info, 0, 0)
+   love.graphics.setColor({255, 255, 255, 255})
 
    bullet_now = 0
 
