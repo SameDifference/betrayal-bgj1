@@ -5,6 +5,7 @@ function love.load()
    bullet = love.graphics.newImage("bullet.png")
    jackson = love.graphics.newImage("jackson.png")
    hall = love.graphics.newImage("hall.png")
+   mine = love.graphics.newImage("mine.png")
    say_msg = {}
    conversation = 0
    x = 50
@@ -14,7 +15,9 @@ function love.load()
        bullets[i] = {}
    end
 
-   mines = { {} }
+   mines = { {nil} }
+   current_mine = 1
+   math.randomseed(os.time())
 
    bullet_count = 60
    is_reloading = 0
@@ -79,7 +82,7 @@ function love.update(dt)
       end
    end
 
-   bullet_now = 0
+   bullet_now = 1
 
    while bullet_now <= 60 do
       if bullets[bullet_now] ~= nil and bullets[bullet_now].exists == 1 then
@@ -91,7 +94,50 @@ function love.update(dt)
       end
       bullet_now = bullet_now + 1
    end
+   
+   mine_now = 1
+   
+   while mine_now <= current_mine do
+      if mines[mine_now] ~= nil and mines[mine_now].y ~= nil then
+         mines[mine_now].y = mines[mine_now].y + (dt * 50)
+         if mines[mine_now].y > love.graphics.getHeight() then
+            mines[mine_now] = { nil }
+         end
+      end
+      mine_now = mine_now + 1
+   end
+   
+   if conversation > 80 and conversation < 130 then
+      --print("mine considered")
+      if math.random(1, 100) > 97 then
+         --print("random passed")
+         --print("done")
+         mines[current_mine] = {}
+         mines[current_mine].x = math.random(0, love.graphics.getHeight())
+         mines[current_mine].y = 0
+         mines[current_mine].exists = 1
+         current_mine = current_mine + 1
+      end
+   end
 
+   collidersbull = 1
+   collidersmine = 1
+
+   while collidersbull <= 60 do
+      if bullets[collidersbull].y ~= nil then
+      while collidersmine <= current_mine do
+         if mines[collidersmine] ~= nil and mines[collidersmine].y ~= nil then
+         if math.abs(bullets[collidersbull].y - mines[collidersmine].y) <= 100 then
+            if math.abs(bullets[collidersbull].x - mines[collidersmine].x) <= 100 then
+               mines[collidersmine] = {nil}
+            end
+         end
+         end
+         collidersmine = collidersmine + 1
+      end
+      end
+      collidersbull = collidersbull + 1
+   end
    conversation = conversation + dt
    if love.keyboard.isDown("s") then
       conversation = 70
@@ -109,6 +155,16 @@ function say(message, image)
    love.graphics.setColor({255, 255, 255, 255})
 end
 
+function drawall(tbl, untnum, image)
+   local x = 1
+   while x <= untnum do
+      if tbl[x] ~= nil and tbl[x].exists == 1 then
+         love.graphics.draw(image, tbl[x].x, tbl[x].y)
+      end
+      x = x + 1
+   end
+end
+
 function love.draw()
    love.graphics.draw(bg, 0, 0)
    love.graphics.draw(player, x, y)
@@ -117,15 +173,9 @@ function love.draw()
    info = bullet_count .. "/" .. 60 .. "\n" .. "Reloading: " .. is_reloading
    love.graphics.print(info, 0, 0)
    love.graphics.setColor({255, 255, 255, 255})
-
-   bullet_now = 0
-
-   while bullet_now <= 60 do
-      if bullets[bullet_now] ~= nil and bullets[bullet_now].exists == 1 then
-           love.graphics.draw(bullet, bullets[bullet_now].x, bullets[bullet_now].y)
-      end
-      bullet_now = bullet_now + 1
-   end
+   
+   drawall(bullets, 60, bullet)
+   drawall(mines, current_mine, mine)
 
    if say_msg[1] ~= nil then
       say(say_msg[1], say_msg[2])
