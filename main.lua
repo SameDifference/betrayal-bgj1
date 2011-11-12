@@ -34,7 +34,7 @@ function love.update(dt)
          bullet_count = bullet_count - 1
          bullets[bullet_count] = {}
          bullets[bullet_count].exists = 1
-         bullets[bullet_count].x = x
+         bullets[bullet_count].x = x + (player:getWidth() / 2)
          bullets[bullet_count].y = y 
          print("fire")
          if bullet_count < 1 then
