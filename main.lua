@@ -34,11 +34,11 @@ function love.load()
       [61] = {"Delta X we have hostile movement in your area over!", hall},
       [70] = {"Copy that Orange 3, will take them out.", jackson},
       [80] = {nil, nil},
-      [130] = {"Delta X skies are clear.", hall},
-      [137] = {"But you, must die!", hall},
-      [145] = {"I knew it Hall!", jackson}, --_alarm},
-      [150] = {"It was not my order. But it must happen, die Jackson!", hall},
-      [170] = {"Where am I...", jackson} --_bloody}
+      [130] = {"Delta X skies are clear. Very well played on defeating the magic ball attack.", hall},
+      [137] = {"But you, you must die!", hall},
+      [145] = {"I knew it Hall! You'll never take me!", jackson}, --_alarm},
+      [150] = {"It was not my order. But it must happen, die Jackson! Die!", hall},
+      [158] = {nil, nil}
    }
 
 
@@ -127,8 +127,8 @@ function love.update(dt)
       if bullets[collidersbull].y ~= nil then
       while collidersmine <= current_mine do
          if mines[collidersmine] ~= nil and mines[collidersmine].y ~= nil then
-         if math.abs(bullets[collidersbull].y - mines[collidersmine].y) <= 100 then
-            if math.abs(bullets[collidersbull].x - mines[collidersmine].x) <= 100 then
+         if math.abs(bullets[collidersbull].y - mines[collidersmine].y) <= 300 then
+            if math.abs(bullets[collidersbull].x - mines[collidersmine].x) <= 300 then
                mines[collidersmine] = {nil}
             end
          end
