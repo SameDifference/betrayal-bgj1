@@ -7,6 +7,13 @@ function love.load()
    hall = love.graphics.newImage("hall.png")
    mine = love.graphics.newImage("mine.png")
    le_programmer = love.graphics.newImage("helper.png")
+   hallplane = love.graphics.newImage("hallplane.png")
+   hallfight = { {} }
+   hallbullets = { {} }
+   hallfight[1].x = love.graphics.getWidth() / 2
+   hallfight[1].y = hallplane:getHeight()
+   hallfight[1].health = 300
+   print(hallfight[1].x, hallfight[1].y, hallfight[1].health)
    
    say_msg = {}
    conversation = 0
@@ -75,11 +82,11 @@ function love.update(dt)
 
    if love.keyboard.isDown(" ") then
       if is_reloading == 0 then
-         bullet_count = bullet_count - 1
          bullets[bullet_count] = {}
          bullets[bullet_count].exists = 1
          bullets[bullet_count].x = x + (player:getWidth() / 2)
-         bullets[bullet_count].y = y 
+         bullets[bullet_count].y = y
+         bullet_count = bullet_count - 1
          post["bullets fired"] = post["bullets fired"] + 1
          --print("fire")
          if bullet_count < 1 then
@@ -104,7 +111,7 @@ function love.update(dt)
       if bullets[bullet_now] ~= nil and bullets[bullet_now].exists == 1 then
          bullets[bullet_now].y = bullets[bullet_now].y - (dt * 300)
          if bullets[bullet_now].y < 0 then
-            bullets[bullet_now].exists = 0
+            bullets[bullet_now] = { }
             --print("bullet leaves")
          end
       end
@@ -141,28 +148,15 @@ function love.update(dt)
    local collidersmine = 1
    local ydiff = 0
    local xdiff = 0
-
-   while collidersbull <= 60 do
-      if bullets[collidersbull].y ~= nil and bullets[collidersbull].exists == 1 then
-      while collidersmine <= current_mine do
-         if mines[collidersmine] ~= nil and mines[collidersmine].y ~= nil then
-         ydiff = bullets[collidersbull].y - mines[collidersmine].y
-         if ydiff <= 60 and ydiff >= 0 then
-            xdiff = bullets[collidersbull].x - mines[collidersmine].x
-            if xdiff <= 60 and xdiff >= 0 then
-               mines[collidersmine] = {nil}
-               post["enemies killed"] = post["enemies killed"] + 1
-            end
-         end
-         end
-         collidersmine = collidersmine + 1
-      end
-      end
-      collidersbull = collidersbull + 1
-   end
+   
+   doescollide(bullets, mines, 60, current_mine, 60, 60, "kill")
+   
+   doescollide(bullets, hallfight, 60, 1, 87, 68, "")
+   hallfight[1].x = hallfight[1].x + (dt * ((hallfight[1].x - x > 0) and -75 or 75))
+   
    conversation = conversation + dt
    if love.keyboard.isDown("s") and conversation < 70 then
-      conversation = 70
+      conversation = 150
    end
 
    if conv[math.floor(conversation)] ~= nil then
@@ -187,6 +181,41 @@ function drawall(tbl, untnum, image)
    end
 end
 
+function doescollide(tbl1, tbl2, untnum1, untnum2, xsize, ysize, kill)
+   local coll1 = 1
+   local coll2 = 1
+   if kill == "kill" then
+      kill = 1
+   else
+      kill = 0
+   end
+   while coll1 <= untnum1 do
+      if tbl1[coll1].y ~= nil and tbl1[coll1].exists == 1 then
+      while coll2 <= untnum2 do
+         if tbl2[coll2] ~= nil and tbl2[coll2].y ~= nil then
+         ydiff = tbl1[coll1].y - tbl2[coll2].y
+         if ydiff <= ysize and ydiff >= 0 then
+            xdiff = tbl1[coll1].x - tbl2[coll2].x
+            if xdiff <= xsize and xdiff >= 0 then
+               if kill == 1 then
+                  tbl1[coll1] = {nil}
+                  tbl2[coll2] = {nil}
+                  post["enemies killed"] = post["enemies killed"] + 1
+               else
+                  tbl1[coll1] = {nil}
+                  print("Bullet", coll1, "hit Hall")
+                  tbl2[coll2].health = tbl2[coll2].health - 1
+               end
+            end
+         end
+         end
+         coll2 = coll2 + 1
+      end
+      end
+      coll1 = coll1 + 1
+   end
+end
+
 function love.draw()
    love.graphics.draw(bg, 0, 0)
    love.graphics.draw(player, x, y)
@@ -201,6 +230,10 @@ function love.draw()
 
    if say_msg[1] ~= nil then
       say(say_msg[1], say_msg[2])
+   end
+   
+   if conversation > 150 then
+      love.graphics.draw(hallplane, hallfight[1].x, hallfight[1].y)
    end
 end
 
