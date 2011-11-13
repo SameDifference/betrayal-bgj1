@@ -22,6 +22,10 @@ Me.
 
 You actually want to use this code?
 
+## Known Bugs
+
+Yes.
+
 ## Jokes?
 
 I have plenty.
