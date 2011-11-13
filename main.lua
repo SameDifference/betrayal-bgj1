@@ -10,7 +10,7 @@ function love.load()
    hallplane = love.graphics.newImage("hallplane.png")
    explosion = love.graphics.newImage("explosionun.png")
 
-   music = love.audio.newSource("epic.midi", "static")
+   music = love.audio.newSource("epic.wav", "static")
    
    bigfont = love.graphics.newFont(28)
    
