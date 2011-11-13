@@ -9,6 +9,8 @@ function love.load()
    le_programmer = love.graphics.newImage("helper.png")
    hallplane = love.graphics.newImage("hallplane.png")
    explosion = love.graphics.newImage("explosionun.png")
+
+   music = love.audio.newSource("epic.midi", "static")
    
    bigfont = love.graphics.newFont(28)
    
@@ -194,6 +196,7 @@ function love.update(dt)
 
    if conv[math.floor(conversation)] ~= nil then
       say_msg = conv[math.floor(conversation)]
+      love.audio.play(music)
    end
 end
 
