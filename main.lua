@@ -1,5 +1,5 @@
 function love.load()
-   love.graphics.setCaption("BaconGameJam 1")
+   love.graphics.setCaption("Betrayal")
    bg = love.graphics.newImage("sky.jpg")
    player = love.graphics.newImage("player.png")
    bullet = love.graphics.newImage("bullet.png")
@@ -10,13 +10,16 @@ function love.load()
    hallplane = love.graphics.newImage("hallplane.png")
    explosion = love.graphics.newImage("explosionun.png")
    
+   bigfont = love.graphics.newFont(28)
+   
    hallfight = { }
    hallfight.x = love.graphics.getWidth() / 2
    hallfight.y = (hallplane:getHeight() == nil) and 0 or hallplane:getHeight()
    hallfight.health = 100
    
-   playerfight = { x = love.graphics.getWidth() / 2, y = love.graphics.getHeight() - player:getHeight(), health = 250, exists = 1}
+   playerfight = { x = love.graphics.getWidth() / 2, y = love.graphics.getHeight() - player:getHeight(), health = 200, exists = 1}
    
+
    freezeplayer = 0
    drawnothing = 0
    
@@ -36,22 +39,22 @@ function love.load()
    speed = 100
    conv = {
       [1] = {"Delta X to Orange 3, do you copy?\n(Press s to skip dialogue.)", jackson},
-      [9] = {"Orange 3 copies loud and clear Delta X over.", hall},
-      [16] = {"Delta X to Orange 3 return time over.", jackson},
+      [9] = {"Orange 3 copies loud and clear Delta X over.\nYour mission is simple Delta X disarm enemy ghost missles in the area. Over.", hall},
+      [16] = {"Clear copy Orange 3, can you return the current time? Over.", jackson},
       [25] = {"Orange 3 to Delta X it's 11:11 11/11/11, do you copy?", hall},
       [32] = {"Delta X copies Orange 3, over.", jackson},
       [40] = {"*shuts down the radio*", jackson},
-      [44] = {"I've spent so far, away from home.", jackson},
-      [52] = {"So sad, so alone...", jackson},
+      [44] = {"I've spent so far away from home.", jackson},
+      [52] = {"Something is amiss, Hall seems a little shifty.\n...\nHe probably had too much caffine again.", jackson},
       [61] = {"Delta X we have hostile movement in your area over!", hall},
       [70] = {"Copy that Orange 3, will take them out.", jackson},
-      [80] = {"Spacebar to shoot.\n    Arrows to move.\n     z to reload\n     This game is lovely, and so are you.", le_programmer},
+      [80] = {"Spacebar to shoot.\n    Arrows to move.\n    z to reload\n    This game is lovely, and so are you.", le_programmer},
       [90] = {nil, nil},
-      [115] = {"Something is wrong... these are our ghosts!", jackson},
+      [115] = {"Something is wrong... these are our ghost missles!", jackson},
       [130] = {"Delta X skies are clear. Very well played on defeating the enemy ghosts over.", hall},
-      [137] = {"But you, you must die!", hall},
-      [145] = {"I knew it Hall! You'll never take me!", jackson}, --_alarm},
-      [150] = {"It was not my order. But it must happen, die Jackson! Die!", hall},
+      [137] = {"But now, you must die!", hall},
+      [145] = {"I knew something was wrong Hall. I won't be the one dying today!", jackson},
+      [150] = {"It was not my order. But it must happen. Die Jackson! Die!", hall},
       [158] = {nil, nil}
    }
    
@@ -66,47 +69,49 @@ function love.load()
 end
 
 function love.update(dt)
-   if freezeplayer == 0 then
-   if love.keyboard.isDown("right") then
-      playerfight.x = playerfight.x + (speed * dt)
-   elseif love.keyboard.isDown("left") then
-      playerfight.x = playerfight.x - (speed * dt)
-   end
-   end
-   
-   post["time taken"] = post["time taken"] + dt
+   if freezeplayer ~= 1 then
+      if love.keyboard.isDown("right") then
+         playerfight.x = playerfight.x + (speed * dt)
+         if playerfight.x > love.graphics.getWidth() - 87 then
+            playerfight.x = love.graphics.getWidth() - 87
+         end
+      elseif love.keyboard.isDown("left") then
+         playerfight.x = playerfight.x - (speed * dt)
+         if playerfight.x < 0 then
+            playerfight.x = 0
+         end
+      end      
+      post["time taken"] = post["time taken"] + dt
+      
 
-   if is_reloading > 0 then
-       is_reloading = is_reloading - dt
-       if is_reloading < 0 then
-           --print("done reloading")
-           is_reloading = 0
-           bullet_count = 60
-       end
-   end
+      if is_reloading > 0 then
+          is_reloading = is_reloading - dt
+          if is_reloading < 0 then
+              is_reloading = 0
+              bullet_count = 60
+          end
+      end
 
-   if love.keyboard.isDown(" ") then
-      if is_reloading == 0 then
-         bullets[bullet_count] = {}
-         bullets[bullet_count].exists = 1
-         bullets[bullet_count].x = playerfight.x + (player:getWidth() / 2)
-         bullets[bullet_count].y = playerfight.y
-         bullet_count = bullet_count - 1
-         post["bullets fired"] = post["bullets fired"] + 1
-         --print("fire")
-         if bullet_count < 1 then
-            is_reloading = 1
-            post["times reloaded"] = post["times reloaded"] + 1
-            --print("reloading")
+      if love.keyboard.isDown(" ") then
+         if is_reloading == 0 then
+            bullets[bullet_count] = {}
+            bullets[bullet_count].exists = 1
+            bullets[bullet_count].x = playerfight.x + (player:getWidth() / 2)
+            bullets[bullet_count].y = playerfight.y
+            bullet_count = bullet_count - 1
+            post["bullets fired"] = post["bullets fired"] + 1
+            if bullet_count < 1 then
+               is_reloading = 1
+               post["times reloaded"] = post["times reloaded"] + 1
+            end
          end
       end
-   end
 
-   if love.keyboard.isDown("z") then
-      if is_reloading == 0 then
-         is_reloading = 1
-         --print("reloading")
-         post["times reloaded"] = post["times reloaded"] + 1
+      if love.keyboard.isDown("z") then
+         if is_reloading == 0 then
+            is_reloading = 1
+            post["times reloaded"] = post["times reloaded"] + 1
+         end
       end
    end
 
@@ -117,7 +122,6 @@ function love.update(dt)
          bullets[bullet_now].y = bullets[bullet_now].y - (dt * 300)
          if bullets[bullet_now].y < 0 then
             bullets[bullet_now] = { }
-            --print("bullet leaves")
          end
       end
       bullet_now = bullet_now + 1
@@ -144,20 +148,15 @@ function love.update(dt)
    end
    
    if conversation > 80 and conversation < 130 then
-      --print("mine considered")
       if math.random(1, 100) > 97 then
-         --print("random passed")
-         --print("done")
          mines[current_mine] = {}
-         mines[current_mine].x = math.random(0, love.graphics.getWidth())
+         mines[current_mine].x = math.random(60, love.graphics.getWidth() - 60)
          mines[current_mine].y = 0
          mines[current_mine].exists = 1
          current_mine = current_mine + 1
       end
    elseif conversation > 150 then
-      if math.random(1, 100) > 98 then
-         --print("random passed")
-         --print("done")
+      if math.random(1, 100) > 90 then
          mines[current_mine] = {}
          mines[current_mine].x = hallfight.x
          mines[current_mine].y = hallfight.y
@@ -168,17 +167,24 @@ function love.update(dt)
    if conversation < 150 then
       doescollide(bullets, mines, 60, current_mine, 60, 60, "kill")
    else
-      doescollide(bullets, { hallfight }, 60, 1, 87, 68, "damage")
-      hallfight.x = hallfight.x + (dt * ((hallfight.x - playerfight.x > 0) and -75 or 75))
+      if freezeplayer ~= 1 then
+         doescollide(bullets, { hallfight }, 60, 1, 87, 68, "damage")
+      end
+      if hallfight.health > 0 then
+         hallfight.x = hallfight.x + (dt * ((hallfight.x - playerfight.x > 0) and -75 or 75))
+      end
    end
    
-   doescollide(mines, { playerfight }, current_mine, 1, 87, 68, "damage")
+   if freezeplayer ~= 1 then
+      doescollide(mines, { playerfight }, current_mine, 1, 87, 68, "damage")
+   end
 
    
    if hallfight.health < 1 then
       post["game finished"] = 1
       freezeplayer = 1
-      hallfight.x = x
+      hallfight.x = playerfight.x
+      hallfight.health = 0
    end
 
    conversation = conversation + dt
@@ -264,25 +270,41 @@ if drawnothing == 0 then
       love.graphics.draw(hallplane, hallfight.x, hallfight.y)
    end
 else
-   say("But I'm still alive.", jackson)
-   love.graphics.fontSize(24)
-   love.graphics.printf("But I'm still alive.", 0, love.graphics.getHeight() / 2, love.graphics.getWidth(), "center")
+   love.graphics.printf("Congratulations!\n" ..
+   "Enemies Killed: " .. post["enemies killed"] .. "\n" ..
+   "Enemies Let Go: " .. post["enemies let go"] .. "\n" ..
+   "Bullets Fired: " .. post["bullets fired"] .. "\n" ..
+   "Times Reloaded: " .. post["times reloaded"] .. "\n" ..
+   "Time Taken: " .. math.floor(post["time taken"]) .. "\n" ..
+   "Completed? " .. ((post["game finished"] > 0) and "Yes!" or "No."), 
+   0, love.graphics.getHeight() / 4, love.graphics.getWidth(), "center")
+   if os.time() - untilalive > 5 and os.time() - untilalive < 15 then
+      say("Nice try, but I'm still alive.", jackson)
+   elseif os.time() - untilalive  > 18 then
+      say("Made by: le_programmer for BaconGameJam #1\nAll art from OpenGameArt.org\nAll characters appearing in this work are fictitious.\nAny resemblance to real persons, living or dead, is purely coincidental.", le_programmer)
+   end
 end
    
-   if freezeplayer == 1 then
-      hallfight.y = hallfight.y + 1
-      say("We will both die, Jackson! I must fulfill the orders!", hall)
-      if hallfight.y == (y - hallplane:getHeight()) then
-         love.graphics.setBackgroundColor(255, 0, 0)
-         love.graphics.draw(explosion, x, y)
+   if freezeplayer == 1 and drawnothing == 0 then
+      hallfight.y = hallfight.y + 5
+      say("DIE!", hall)
+      if math.random(1, 100) == 99 then
+         love.graphics.draw(explosion, hallfight.x, hallfight.y)
+      end
+      if hallfight.y > playerfight.y then
+         love.graphics.setBackgroundColor(128, 128, 128)
+         love.graphics.draw(explosion, playerfight.x, playerfight.y)
          drawnothing = 1
          freezeplayer = 0
+         untilalive = os.time()
       end
    end
-
+   
    if playerfight.health < 1 then
-      love.graphics.setBackground(255, 0, 0)
+      love.graphics.setBackgroundColor(255, 0, 0)
       love.graphics.printf("You have died.", 0, love.graphics.getHeight() / 2, love.graphics.getWidth(), "center")
+      freezeplayer = 1
+      drawnothing = 1
    end
 end
 
